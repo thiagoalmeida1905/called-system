@@ -17,10 +17,6 @@ export default function SignUp() {
         if (name !== '' && email !== '' && password !== ''){
             await signUp(email, password, name)
         }
-
-        setName('');
-        setEmail('');
-        setPassword('');
     }
 
     return(
