@@ -10,17 +10,19 @@ export const AuthContext = createContext({});
 
 
 function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(null); //Info do usuario
     const [ loadingAuth, setLoadingAuth] = useState(false); // estado para controlar o 'Spiner' indicação ao usuario que ha um processos sendo feito.
     const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
 
-    useEffect(() => {
+    // ---------------- carregamento dos dados no localStorage ------------//
+
+    useEffect(() => { //efeito para carregar os dados do usuario no localStorage na montagem do componente
         async function loadUser(){
             const storageUser = localStorage.getItem('@ticketsPRO')
 
-            if (storageUser) {
+            if (storageUser) { // se tiver os dados: atualiza os estados
                 setUser(JSON.parse(storageUser));
                 setLoading(false);
             }
@@ -31,6 +33,7 @@ function AuthProvider({ children }) {
         loadUser();
     }, [])
 
+    //--------------------- Login do usuario ------------------------------//
     async function signIn(email, password) {
         setLoadingAuth(true);
 
@@ -61,7 +64,7 @@ function AuthProvider({ children }) {
         })
     }
 
-    // Cadastrar um novo user
+    // --------------- Cadastrar um novo user  -----------------------//
     async function signUp(email, password, name) {
         setLoadingAuth(true);// indicação de operação de autenticação sendo feita
 
@@ -95,17 +98,19 @@ function AuthProvider({ children }) {
         })
     }
 
+    // --------------------- Salvar dados no LocalStorage ----------------//
     function storageUser (data) { // função para salvar os dados do Usuario no local storage
         localStorage.setItem('@ticketsPRO', JSON.stringify(data))
     }
 
+    // --------------------- Função para deslogar usuario ----------------//
     async function logout (){
         await signOut(auth);
         localStorage.removeItem('@ticketsPRO');
         setUser(null);
     }
 
-
+    //---------------------------------------------------------------------
     return (
         <AuthContext.Provider 
             value={{ 
