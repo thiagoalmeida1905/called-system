@@ -5,12 +5,10 @@ form textarea {
 
 form input[type='radio'] {
     margin: 15px 0;
-    background-color: red;
 }
 
 form input[type="radio"]:not(:first-child){
     margin-left: 15px;
-    background-color: red;
 }
 
 .status span {

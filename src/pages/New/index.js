@@ -67,7 +67,7 @@ export default function New() {
     }
 
 
-    //----------------- Função para cadastar usuario ------------------------------------ //
+    //----------------- Função para cadastar chamado ------------------------------------ //
 
     async function handleRegister (e) {
         e.preventDefault();
