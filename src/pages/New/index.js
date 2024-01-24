@@ -5,14 +5,17 @@ import './new.css';
 import { FiPlusCircle } from 'react-icons/fi';
 import { AuthContext } from '../../contexts/auth';
 import { db } from '../../services/firebaseConnection';
-import { collection, getDocs, getDoc, doc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, addDoc, updateDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import { useParams, useNavigate } from 'react-router-dom';
 
 
 const listRef = collection(db, 'customers');//REFERÊNCIA À COLEÇÃO DE CLIENTE
 
 export default function New() {
     const { user } = useContext(AuthContext);
+    const { id } = useParams();
+    const navigate = useNavigate();
 
     const [ customers, setCustomer ] = useState([]);
     const [ loadCustomer, setLoadCustomer ] = useState(true);
@@ -20,6 +23,7 @@ export default function New() {
     const [ complemento, setComplemento ] = useState('');
     const [ assunto, setAssunto ] = useState('Suporte');
     const [ status, setStatus ] = useState('Aberto');
+    const [ idCustomer, setIdCustomer ] = useState(false)
 
     useEffect( ()=>{ //BUSCANDO INFORMAÇÃO DE TODOS OS CLIENTES CADASTRADOS NA MONTAGEM DO COMPONENTE
         async function loadCustomer(){
@@ -42,6 +46,11 @@ export default function New() {
 
                 setCustomer(lista);
                 setLoadCustomer(false);
+
+                if(id){
+                    loadId(lista);
+                }
+
             })
             .catch((error) => {
                 console.log('ERRO AO BUSCAR OS CLIENTES', error)
@@ -52,7 +61,25 @@ export default function New() {
         }
 
         loadCustomer()
-    }, [])
+    }, [id])
+
+    async function loadId(lista){
+        const docRef = doc(db, 'chamados', id)
+        await getDoc(docRef)
+        .then((snapshot)=>{
+            setAssunto(snapshot.data().assunto);
+            setStatus(snapshot.data().status);
+            setComplemento(snapshot.data().complemento);
+
+            let index = lista.findIndex(item => item.id === snapshot.data().clienteId);
+            setCustomerSelected(index);
+            setIdCustomer(true);
+        })
+        .catch((error)=>{
+            console.log(error)
+            setIdCustomer(false);
+        })
+    }
 
     function handleOptionChange(e) {
         setStatus(e.target.value)
@@ -72,6 +99,30 @@ export default function New() {
     async function handleRegister (e) {
         e.preventDefault();
 
+        // Atualizando chamado
+        if(idCustomer){
+            const docRef = doc(db, 'chamados', id)
+            await updateDoc(docRef, {
+                cliente: customers[customerSelected].nomeFantasia,
+                clienteId: customers[customerSelected].id,
+                assunto: assunto,
+                complemento: complemento,
+                status: status,
+                userId: user.uid
+            }).then (()=> {
+                toast.info('Chamado atualizado com sucesso!')
+                setCustomerSelected(0);
+                setComplemento('');
+                navigate('/dashboard')
+            })
+            .catch((error) => {
+                toast.error('ops erro ao atualizar esse chamado!')
+                console.log(error)
+            })
+            return;
+        }
+
+        //registrando um chamado
         await addDoc(collection(db, 'chamados'), {
             created: new Date(),
             cliente: customers[customerSelected].nomeFantasia,
@@ -89,7 +140,6 @@ export default function New() {
         .catch( (error) => {
             toast.error('Ops! erro ao registrar, tente novamente mais tarde!')
         })
-        
     }
 
 
@@ -98,7 +148,7 @@ export default function New() {
             <Header/>
 
             <div className="content">
-                <Title name='Novo Chamado'>
+                <Title name={id ? 'Editando chamado' : 'Novo chamado'}>
                     <FiPlusCircle size={25}/>
                 </Title>
 
@@ -136,7 +186,7 @@ export default function New() {
                                 name='radio'
                                 value='Aberto' 
                                 onChange={handleOptionChange}
-                                checked={ status === 'aberto'}
+                                checked={ status === 'Aberto'}
                             />
                             <span>Em aberto</span>
 

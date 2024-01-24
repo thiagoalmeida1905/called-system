@@ -31,8 +31,6 @@ export default function Dashboard () {
             await updateState(querySnapshot); //Chamamos updateState passando a promise (os documentos)
 
             setLoading(false);
-
-
         }
 
         loadChamados();
@@ -40,6 +38,7 @@ export default function Dashboard () {
         return () => {}
     }, [])
 
+    //--------------------- função para montar a lista e atualizar os states -------------------
     async function updateState( querySnapshot ) { // manipular  e montar a lista para os estados
         const isCollenctionEmpty = querySnapshot.size === 0; //verificação se está vazio
         
@@ -60,9 +59,6 @@ export default function Dashboard () {
             })
 
             const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] //pegando o ultimo item
-
-
-
             setChamados(chamados => [...chamados, ...lista])// juntando os chamados, os q já estavam mais os novos
             setLastDocs(lastDoc);
 
@@ -72,6 +68,7 @@ export default function Dashboard () {
         setLoadingMore(false);
     }
 
+    //------------------- Função para adicionar mais chamados na ui -------------------------
      async function handleMore(){
         setLoadingMore(true);
 
@@ -138,7 +135,7 @@ export default function Dashboard () {
                                                 <td data-label='Cliente'> {item.cliente} </td>
                                                 <td data-label='Assunto'> {item.assunto}</td>
                                                 <td data-label='Status'>
-                                                    <span 
+                                                    <span
                                                         className="badge" 
                                                         style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : '#999' }}
                                                     >
@@ -154,12 +151,13 @@ export default function Dashboard () {
                                                     >
                                                         <FiSearch color='#fff' size={17} />
                                                     </button>
-                                                    <button 
+                                                    <Link
+                                                        to={`/new/${item.id}`}
                                                         className="action" 
                                                         style={{ backgroundColor: '#f6a935' }}
                                                     >
                                                         <FiEdit2 color='#fff' size={17} />
-                                                    </button>
+                                                    </Link>
                                                 </td>
                                             </tr>
                                         )
