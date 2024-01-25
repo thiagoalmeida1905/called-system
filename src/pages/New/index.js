@@ -16,14 +16,13 @@ export default function New() {
     const { user } = useContext(AuthContext);
     const { id } = useParams();
     const navigate = useNavigate();
-
-    const [ customers, setCustomer ] = useState([]);
-    const [ loadCustomer, setLoadCustomer ] = useState(true);
-    const [ customerSelected, setCustomerSelected ] = useState(0)
+    const [ customers, setCustomer ] = useState([]);// armazena a lista de clientes
+    const [ loadCustomer, setLoadCustomer ] = useState(true);// controla o estado de carregamento dos clientes, true -> lista sendo carregada
+    const [ customerSelected, setCustomerSelected ] = useState(0)// armazena o indice do cliente selecionado no formulario
     const [ complemento, setComplemento ] = useState('');
     const [ assunto, setAssunto ] = useState('Suporte');
     const [ status, setStatus ] = useState('Aberto');
-    const [ idCustomer, setIdCustomer ] = useState(false)
+    const [ idCustomer, setIdCustomer ] = useState(false);//estado para saber quando atualizar e quando registrar
 
     useEffect( ()=>{ //BUSCANDO INFORMAÇÃO DE TODOS OS CLIENTES CADASTRADOS NA MONTAGEM DO COMPONENTE
         async function loadCustomer(){
@@ -50,18 +49,18 @@ export default function New() {
                 if(id){
                     loadId(lista);
                 }
-
             })
             .catch((error) => {
                 console.log('ERRO AO BUSCAR OS CLIENTES', error)
                 setLoadCustomer(false)
                 setCustomer([{id: '1', nomeFantasia: 'FREELA'}])
-
             })
         }
 
         loadCustomer()
     }, [id])
+
+    //------- Função para preencher os dados na aba de chamados /id --------
 
     async function loadId(lista){
         const docRef = doc(db, 'chamados', id)
@@ -71,9 +70,9 @@ export default function New() {
             setStatus(snapshot.data().status);
             setComplemento(snapshot.data().complemento);
 
-            let index = lista.findIndex(item => item.id === snapshot.data().clienteId);
-            setCustomerSelected(index);
-            setIdCustomer(true);
+            let index = lista.findIndex(item => item.id === snapshot.data().clienteId); // fazendo uma comparação se o item que recebemos da lista tem o mesmo id
+            setCustomerSelected(index); //colocando o valor correspondente no select 
+            setIdCustomer(true); //indicando que está numa tela para edição de uma chamado
         })
         .catch((error)=>{
             console.log(error)
@@ -93,14 +92,13 @@ export default function New() {
         setCustomerSelected(e.target.value)
     }
 
-
-    //----------------- Função para cadastar chamado ------------------------------------ //
+    //--------------- Função para cadastar chamado ---------------- //
 
     async function handleRegister (e) {
         e.preventDefault();
 
         // Atualizando chamado
-        if(idCustomer){
+        if(idCustomer){ //se tiver um id = atualizar chamado
             const docRef = doc(db, 'chamados', id)
             await updateDoc(docRef, {
                 cliente: customers[customerSelected].nomeFantasia,
@@ -113,7 +111,7 @@ export default function New() {
                 toast.info('Chamado atualizado com sucesso!')
                 setCustomerSelected(0);
                 setComplemento('');
-                navigate('/dashboard')
+                navigate('/dashboard');
             })
             .catch((error) => {
                 toast.error('ops erro ao atualizar esse chamado!')
@@ -141,7 +139,6 @@ export default function New() {
             toast.error('Ops! erro ao registrar, tente novamente mais tarde!')
         })
     }
-
 
     return (
         <div>

@@ -8,20 +8,20 @@ import { Link } from "react-router-dom";
 import { collection, getDocs, orderBy, limit, startAfter, query } from "firebase/firestore";
 import { db } from "../../services/firebaseConnection";
 import { format } from "date-fns";
-
-
+import Modal from "../../components/Modal";
 
 const listRef = collection(db, 'chamados');
 
 export default function Dashboard () {
 
-    const { logout } = useContext(AuthContext);
-    const [ chamados, setChamados] = useState([]);
-    const [ loading, setLoading] = useState(true);
-    const [ isEmpty, setIsEmpty] = useState(false);
-    const [ lastDocs, setLastDocs ] = useState();
-    const [ loadingMore, setLoadingMore ] = useState(false);
 
+    const [ chamados, setChamados] = useState([]);// armazena a lista de chamados
+    const [ loading, setLoading] = useState(true); //controla o estado de carregamento inicial -> se 'true' -> chamados sendo carregados
+    const [ isEmpty, setIsEmpty] = useState(false); //lista de chamados vazia
+    const [ lastDocs, setLastDocs ] = useState(); // armazena o ultimo documento carregado
+    const [ loadingMore, setLoadingMore ] = useState(false); //carregamento adicional
+    const [ showPostModal, setShowPostModal ] = useState(false); //controle de exibição do modal
+    const [ detail, setDetail ] = useState();// detalhes que serão passados para o modal, assunto, status etc...
 
     useEffect ( ()=>{
         async function loadChamados() {
@@ -41,7 +41,6 @@ export default function Dashboard () {
     //--------------------- função para montar a lista e atualizar os states -------------------
     async function updateState( querySnapshot ) { // manipular  e montar a lista para os estados
         const isCollenctionEmpty = querySnapshot.size === 0; //verificação se está vazio
-        
 
         if (!isCollenctionEmpty){
             let lista = [];
@@ -68,7 +67,7 @@ export default function Dashboard () {
         setLoadingMore(false);
     }
 
-    //------------------- Função para adicionar mais chamados na ui -------------------------
+    //------------- Função para adicionar mais chamados na ui --------------
      async function handleMore(){
         setLoadingMore(true);
 
@@ -77,6 +76,14 @@ export default function Dashboard () {
 
         await updateState(querySnapshot);
     }
+
+    // --------------- Função de controle do modal -------------------------
+    function toggleModal(item){
+        setShowPostModal(!showPostModal);
+        setDetail(item)
+    }
+
+    //---------------- renderização do conteudo ----------------------------
 
     if (loading) {
         return (
@@ -148,6 +155,7 @@ export default function Dashboard () {
                                                     <button 
                                                         className="action" 
                                                         style={{ backgroundColor: '#3583f6' }}
+                                                        onClick={ () => toggleModal(item)}
                                                     >
                                                         <FiSearch color='#fff' size={17} />
                                                     </button>
@@ -170,10 +178,13 @@ export default function Dashboard () {
                         </>
                     )}
                 </>
-
-
             </div>
-            
+            {showPostModal && (
+                <Modal
+                    conteudo={detail}
+                    close={ () => setShowPostModal(!showPostModal) }
+                />
+            )}
         </div>
     )
 }
