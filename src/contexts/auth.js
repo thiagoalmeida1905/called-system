@@ -113,7 +113,7 @@ function AuthProvider({ children }) {
     //---------------------------------------------------------------------
     return (
         <AuthContext.Provider 
-            value={{ 
+            value={{
                 signed: !!user, //user está sendo transf p/ boolean
                 user,
                 signIn,
